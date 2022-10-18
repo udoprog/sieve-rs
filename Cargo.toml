@@ -2,8 +2,14 @@
 name = "sieve"
 version = "0.1.0"
 authors = ["John-John Tedro <udoprog@tedro.se>"]
+description = "A very simple prime sieve written in Rust."
+documentation = "https://docs.rs/sieve"
+readme = "README.md"
+homepage = "https://github.com/udoprog/sieve-rs"
+repository = "https://github.com/udoprog/sieve-rs"
+license = "MIT/Apache-2.0"
+keywords = ["erasthotenes", "fast", "find", "primes", "sieve"]
+categories = ["algorithms", "science"]
 
 [lib]
 path = "lib.rs"
-
-[dependencies]
