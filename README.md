@@ -14,7 +14,7 @@ A simple, growable prime-sieve for Rust.
 All the primes (if you have the memory):
 
 ```rust
-for prime in sieve::Sieve::infinite::<u32>().take(100) {
+for prime in sieve::infinite::<u32>().take(100) {
     println!("prime = {}", prime);
 }
 ```
@@ -22,7 +22,7 @@ for prime in sieve::Sieve::infinite::<u32>().take(100) {
 Only primes below a certain value:
 
 ```rust
-for prime in sieve::Sieve::bounded(1_000_000u64) {
+for prime in sieve::bounded(1_000_000u64) {
     println!("prime = {}", prime);
 }
 ```
