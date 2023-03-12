@@ -12,7 +12,7 @@
 //! All the primes (if you have the memory):
 //!
 //! ```rust
-//! for prime in sieve::Sieve::infinite::<u32>().take(100) {
+//! for prime in sieve::infinite::<u32>().take(100) {
 //!     println!("prime = {}", prime);
 //! }
 //! ```
@@ -20,63 +20,93 @@
 //! Only primes below a certain value:
 //!
 //! ```rust
-//! for prime in sieve::Sieve::bounded(1_000_000u64) {
+//! for prime in sieve::bounded(1_000_000u64) {
 //!     println!("prime = {}", prime);
 //! }
 //! ```
+
+#![deny(missing_docs)]
 
 use std::collections::HashMap;
 use std::hash;
 use std::ops;
 
-pub trait Same<T> {}
-impl<T> Same<T> for T {}
-
-pub struct Sieve<Idx, I> {
-    composite: HashMap<Idx, Idx>,
-    iter: I,
+/// A simple prime sieve.
+pub struct Sieve<I, U> {
+    composite: HashMap<I, I>,
+    iter: U,
 }
 
-impl<Idx, I> Sieve<Idx, I>
-where
-    Idx: PartialEq + Eq + hash::Hash,
-{
+impl<I, U> Sieve<I, U> {
+    /// Get the size of number of stored composite numbers.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut sieve = sieve::infinite::<u32>();
+    ///
+    /// assert!(sieve.by_ref().skip(10).take(10).eq([31, 37, 41, 43, 47, 53, 59, 61, 67, 71]));
+    /// assert_eq!(sieve.size(), 20);
+    /// ```
     pub fn size(&self) -> usize {
         self.composite.len()
     }
 }
 
-impl<Idx> Sieve<Idx, ops::RangeFrom<Idx>> {
-    pub fn infinite<U: Same<Idx>>() -> Sieve<Idx, ops::RangeFrom<Idx>>
-    where
-        Idx: From<u32> + Eq + hash::Hash,
-    {
-        Sieve {
-            iter: 2.into()..,
-            composite: HashMap::new(),
-        }
-    }
-
-    pub fn bounded(upper: Idx) -> Sieve<Idx, ops::Range<Idx>>
-    where
-        Idx: From<u32> + Eq + hash::Hash,
-    {
-        Sieve {
-            iter: 2.into()..upper,
-            composite: HashMap::new(),
-        }
+/// Generate infinite primes.
+///
+/// # Examples
+///
+/// ```
+/// let iter = sieve::infinite::<u32>().skip(10).take(10);
+///
+/// assert!(
+///     iter.eq([31, 37, 41, 43, 47, 53, 59, 61, 67, 71])
+/// );
+/// ```
+#[inline]
+pub fn infinite<I>() -> Sieve<I, ops::RangeFrom<I>>
+where
+    I: From<u32> + Eq + hash::Hash,
+{
+    Sieve {
+        iter: 2.into()..,
+        composite: HashMap::new(),
     }
 }
 
-impl<Idx, I> Iterator for Sieve<Idx, I>
+/// Construct a bounded sieve, which stops returning values after it's reached
+/// the given numerical bound.
+///
+/// # Examples
+///
+/// ```
+/// let iter = sieve::bounded::<u32>(100).skip(10);
+///
+/// assert!(
+///     iter.eq([31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97])
+/// );
+/// ```
+#[inline]
+pub fn bounded<I>(upper: I) -> Sieve<I, ops::RangeInclusive<I>>
 where
-    I: Iterator<Item = Idx>,
-    Idx: Eq + hash::Hash + Copy + ops::Add<Output = Idx> + ops::Mul<Output = Idx>,
+    I: From<u32> + Eq + hash::Hash,
 {
-    type Item = Idx;
+    Sieve {
+        iter: 2.into()..=upper,
+        composite: HashMap::new(),
+    }
+}
+
+impl<I, U> Iterator for Sieve<I, U>
+where
+    U: Iterator<Item = I>,
+    I: Eq + hash::Hash + Copy + ops::Add<Output = I> + ops::Mul<Output = I>,
+{
+    type Item = I;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(n) = self.iter.next() {
+        for n in self.iter.by_ref() {
             if let Some(value) = self.composite.remove(&n) {
                 let mut key = n + value;
 
@@ -93,6 +123,11 @@ where
 
         None
     }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
 }
 
 #[cfg(test)]
@@ -101,7 +136,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let mut sieve = Sieve::infinite::<u32>();
+        let mut sieve = infinite::<u32>();
         let primes = sieve.by_ref().take(100).collect::<Vec<u32>>();
 
         assert_eq!(
