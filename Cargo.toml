@@ -2,8 +2,7 @@
 name = "sieve"
 version = "0.1.0"
 authors = ["John-John Tedro <udoprog@tedro.se>"]
-edition = "2021"
-rust-version = "1.60"
+edition = "2018"
 description = "A very simple prime sieve written in Rust."
 documentation = "https://docs.rs/sieve"
 readme = "README.md"
