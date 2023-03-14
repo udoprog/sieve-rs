@@ -20,6 +20,7 @@ jobs:
         toolchain: ${{matrix.rust}}
     - run: cargo test --all-targets
     - run: cargo test --doc
+      if: matrix.rust == 'stable'
 
   clippy:
     runs-on: ubuntu-latest
