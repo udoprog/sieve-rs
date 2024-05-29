@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '22 5 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
